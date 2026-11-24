@@ -36,12 +36,23 @@ def calcular_precio_unitario(df):
     df['precio_unitario'] = df['precio'] / df['cantidad_base']
     return df
 
+
+def sacar_calidad(df):
+    texto = df['presentacion'].str.lower()
+    df['calidad'] = None
+    palabras = ['integral', 'extra', 'super extra']
+    for palabra in palabras:
+        df.loc[texto.str.contains(r'\b' + palabra + r'\b', na=False), 'calidad'] = palabra
+    return df
+
+
 def preparar_datos(ruta):
     df = cargar_datos(ruta)
     df = quitar_catalogos(df)
     df = sacar_cantidad(df)
     df = calcular_precio_unitario(df)
+    df = sacar_calidad(df)
     df = df.dropna(subset=['precio_unitario'])
-    columnas = ['producto', 'marca', 'estado', 'nombre_comercial', 'precio', 'unidad_base', 'precio_unitario']
+    columnas = ['producto', 'marca', 'estado', 'nombre_comercial', 'precio', 'unidad_base', 'precio_unitario', 'calidad']
     df = df[columnas]
     return df
