@@ -14,9 +14,13 @@ def quitar_catalogos(df):
 
 def sacar_cantidad(df):
     datos = df['presentacion'].str.extract(r'(?i)(\d+(?:\.\d+)?)\s*(Gr|Kg|Ml|Lt)\b')
-    df['cantidad'] = datos[0].astype(float)
+    df['cantidad'] = datos[0]
     df['unidad'] = datos[1].str.lower()
+    miles = df['unidad'].isin(['gr', 'ml']) & df['cantidad'].str.contains(r'^\d+\.\d{3}$', na=False)
+    df.loc[miles, 'cantidad'] = df['cantidad'].str.replace('.', '', regex=False)
+    df['cantidad'] = df['cantidad'].astype(float)
     return df
+
 
 def calcular_precio_unitario(df):
     df['cantidad_base'] = df['cantidad']
