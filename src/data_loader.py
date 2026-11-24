@@ -19,6 +19,10 @@ def sacar_cantidad(df):
     miles = df['unidad'].isin(['gr', 'ml']) & df['cantidad'].str.contains(r'^\d+\.\d{3}$', na=False)
     df.loc[miles, 'cantidad'] = df['cantidad'].str.replace('.', '', regex=False)
     df['cantidad'] = df['cantidad'].astype(float)
+    patron = r'(?i)(\d+)\s*(?:Pzas?|Piezas?|Sobres?|Botellas?|Latas?|Cajas?|Bolsas?|Barras?|Paquetes?)\.?\s*(?:de\s+)?\(?\s*\d+(?:\.\d+)?\s*(?:Gr|Kg|Ml|Lt)\b'
+    piezas = df['presentacion'].str.extract(patron)[0].astype(float)
+    tiene = piezas.notna()
+    df.loc[tiene, 'cantidad'] = df['cantidad'] * piezas
     return df
 
 
