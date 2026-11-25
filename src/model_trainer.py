@@ -90,3 +90,20 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
 
     return resultados
 
+    print(f"\nEl mejor modelo fue {mejor_nombre} con un RMSE de ${mejor_rmse:.2f}")
+
+    #Guardar el mejor modelo
+    ruta_modelo.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(mejor_modelo, ruta_modelo)
+    print(f"Modelo guardado exitosamente en '{ruta_modelo}'")
+
+    #Diccionario de métricas
+    return {
+        "mejor_modelo": mejor_nombre,
+        "r2": resultados[mejor_nombre]["r2"],
+        "mae": resultados[mejor_nombre]["mae"],
+        "rmse": resultados[mejor_nombre]["rmse"],
+        "model_path": str(ruta_modelo),
+        "detalle_modelos": resultados,
+    }
+
