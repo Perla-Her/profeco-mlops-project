@@ -19,7 +19,7 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
     random_state = config.get("random_state", 42)
     ruta_modelo = Path(config.get("model_path", "models/mejor_modelo.pkl"))
 
-    #Preprocesamiento
+    # Preprocesamiento encapsulado
     otras_categoricas = [c for c in X_train.columns if c != "calidad"]
 
     transformadores = []
@@ -38,8 +38,8 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
         transformadores.append(("cat", otras_pipe, otras_categoricas))
 
     preprocessor = ColumnTransformer(transformers=transformadores)
-    return preprocessor
 
+    # Modelos candidatos
     modelos = {
         "Regresion_Lineal": LinearRegression(),
         "Ridge": Ridge(alpha=config.get("ridge_alpha", 1.0)),
@@ -88,16 +88,14 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
             mejor_modelo = pipeline
             mejor_nombre = nombre
 
-    return resultados
-
     print(f"\nEl mejor modelo fue {mejor_nombre} con un RMSE de ${mejor_rmse:.2f}")
 
-    #Guardar el mejor modelo
+    # Guardar el mejor modelo
     ruta_modelo.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(mejor_modelo, ruta_modelo)
     print(f"Modelo guardado exitosamente en '{ruta_modelo}'")
 
-    #Diccionario de métricas
+    #Retornar el diccionario de métricas
     return {
         "mejor_modelo": mejor_nombre,
         "r2": resultados[mejor_nombre]["r2"],
@@ -107,7 +105,7 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
         "detalle_modelos": resultados,
     }
 
-#Pruebas locales
+
 if __name__ == "__main__":
     from sklearn.model_selection import train_test_split
     from src.data_loader import preparar_datos
