@@ -19,7 +19,7 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
     random_state = config.get("random_state", 42)
     ruta_modelo = Path(config.get("model_path", "models/mejor_modelo.pkl"))
 
-    # 1. Preprocesamiento
+    #Preprocesamiento
     otras_categoricas = [c for c in X_train.columns if c != "calidad"]
 
     transformadores = []
@@ -39,3 +39,54 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
 
     preprocessor = ColumnTransformer(transformers=transformadores)
     return preprocessor
+
+    modelos = {
+        "Regresion_Lineal": LinearRegression(),
+        "Ridge": Ridge(alpha=config.get("ridge_alpha", 1.0)),
+        "Random_Forest": RandomForestRegressor(
+            n_estimators=config.get("rf_n_estimators", 50),
+            max_depth=config.get("rf_max_depth", 20),
+            random_state=random_state,
+            n_jobs=-1,
+        ),
+        "Gradient_Boosting": GradientBoostingRegressor(
+            n_estimators=config.get("gb_n_estimators", 100),
+            random_state=random_state,
+        ),
+    }
+
+    mejor_modelo = None
+    mejor_rmse = float("inf")
+    mejor_nombre = ""
+    resultados = {}
+
+    print("Iniciando entrenamiento y comparación de modelos...\n")
+
+    for nombre, modelo in modelos.items():
+        pipeline = Pipeline(steps=[
+            ("preprocessor", preprocessor),
+            ("regressor", modelo),
+        ])
+
+        pipeline.fit(X_train, y_train)
+        y_pred = pipeline.predict(X_test)
+
+        r2 = float(r2_score(y_test, y_pred))
+        mae = float(mean_absolute_error(y_test, y_pred))
+        rmse = float(root_mean_squared_error(y_test, y_pred))
+
+        resultados[nombre] = {
+            "r2": round(r2, 4),
+            "mae": round(mae, 4),
+            "rmse": round(rmse, 4),
+        }
+
+        print(f"Modelo: {nombre:18} | R2: {r2:.4f} | MAE: ${mae:.2f} | RMSE: ${rmse:.2f}")
+
+        if rmse < mejor_rmse:
+            mejor_rmse = rmse
+            mejor_modelo = pipeline
+            mejor_nombre = nombre
+
+    return resultados
+
