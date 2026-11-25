@@ -107,3 +107,21 @@ def train_and_save_model(X_train, y_train, X_test, y_test, config=None):
         "detalle_modelos": resultados,
     }
 
+#Pruebas locales
+if __name__ == "__main__":
+    from sklearn.model_selection import train_test_split
+    from src.data_loader import preparar_datos
+
+    df = preparar_datos("data/raw/proyecto.csv")
+    df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["precio_unitario"])
+
+    features = ["producto", "marca", "estado", "nombre_comercial", "unidad_base", "calidad"]
+    X = df[features]
+    y = df["precio_unitario"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    metricas = train_and_save_model(X_train, y_train, X_test, y_test, config={})
+    print("\nDiccionario retornado:", metricas)
