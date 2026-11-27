@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def cargar_datos(ruta):
@@ -53,6 +55,32 @@ def preparar_datos(ruta):
     df = calcular_precio_unitario(df)
     df = sacar_calidad(df)
     df = df.dropna(subset=['precio_unitario'])
-    columnas = ['producto', 'marca', 'estado', 'nombre_comercial', 'precio', 'unidad_base', 'precio_unitario', 'calidad']
+    columnas = ['producto', 'marca', 'estado', 'nombre_comercial', 'precio',
+            'unidad_base', 'precio_unitario', 'calidad', 'catalogo']
     df = df[columnas]
     return df
+
+
+FEATURES = ["producto", "marca", "estado", "nombre_comercial", "unidad_base", "calidad"]
+
+
+def cargar_catalogo(config):
+    df = preparar_datos(config["data_path"])
+    df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["precio_unitario"])
+    df = df[df["precio_unitario"] > 0]
+    n = config.get("sample_size")
+    if n and len(df) > n:
+        df = df.sample(n, random_state=config["random_state"])
+    return df
+
+
+def dividir_datos(df, config):
+    return train_test_split(
+        df[FEATURES], df["precio_unitario"],
+        test_size=config["test_size"], random_state=config["random_state"],
+    )
+
+
+def load_and_preprocess_data(config):
+    df = cargar_catalogo(config)
+    return dividir_datos(df, config)
