@@ -1,0 +1,16 @@
+# Datos
+data_path: data/raw/proyecto.csv
+sample_size: 100000      # null para usar todo el dataset
+test_size: 0.2
+random_state: 42
+
+# Regresores (precio unitario esperado)
+model_path: models/mejor_modelo.pkl
+ridge_alpha: 1.0
+rf_n_estimators: 50
+rf_max_depth: 20
+gb_n_estimators: 100
+
+# Recomendador de sustitutos
+recommender_path: models/recomendador.pkl
+top_k: 5
